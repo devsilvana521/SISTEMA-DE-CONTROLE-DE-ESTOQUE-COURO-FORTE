@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Controle de Estoque | Botinas Couro Forte</title>
+  <link rel="icon" type="image/png" href="/IMAGE/LOGO COURO FORTE.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script>
+    // Aplica o tema salvo antes de desenhar a página (evita "piscar")
+    try { if (localStorage.getItem('estoque_tema') === 'escuro') document.documentElement.setAttribute('data-tema', 'escuro'); } catch (e) {}
+  </script>
+</head>
+<body>
+  <span id="topo"></span>
+
+  <!-- ================= CABEÇALHO ================= -->
+  <header class="cabecalho">
+    <div class="container cabecalho-conteudo">
+      <a href="#" class="marca" data-ir="painel">
+        <img class="marca-logo" src="/IMAGE/LOGO COURO FORTE.jpg" alt="Logo Botinas Couro Forte">
+        <span class="marca-texto">
+          <strong id="nomeEmpresa">Botinas Couro Forte</strong>
+          <small>Sistema de Controle de Estoque</small>
+        </span>
+      </a>
+
+      <nav class="menu" id="menu">
+        <button class="menu-item ativo" data-ir="painel">Painel</button>
+        <button class="menu-item" data-ir="produtos">Produtos</button>
+        <button class="menu-item" data-ir="movimentar">Entrada / Saída</button>
+        <button class="menu-item" data-ir="historico">Histórico</button>
+        <button class="menu-item" data-ir="config">Backup e Ajustes</button>
+      </nav>
+
+      <div class="cabecalho-acoes">
+        <div class="seletor-tema" role="group" aria-label="Escolher tema">
+          <button class="botao-tema" id="botaoClaro" data-tema-escolha="claro" title="Modo claro" aria-label="Modo claro">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+            <span class="botao-tema-texto">Claro</span>
+          </button>
+          <button class="botao-tema" id="botaoEscuro" data-tema-escolha="escuro" title="Modo escuro" aria-label="Modo escuro">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+            <span class="botao-tema-texto">Escuro</span>
+          </button>
+        </div>
+        <button class="botao-menu-mobile" id="botaoMenuMobile" aria-label="Abrir menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container principal">
+
+    <!-- ================= PAINEL ================= -->
+    <section class="tela ativa" id="tela-painel">
+      <div class="tela-titulo">
+        <div>
+          <h1>Painel geral</h1>
+          <p class="subtitulo" id="dataHoje">—</p>
+        </div>
+        <div class="grupo-botoes">
+          <button class="botao botao-primario" data-acao="novo-produto">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+            Novo produto
+          </button>
+          <button class="botao botao-entrada" data-acao="mov-entrada">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7 7 7-7"/></svg>
+            Entrada
+          </button>
+          <button class="botao botao-saida" data-acao="mov-saida">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7-7 7 7"/></svg>
+            Saída
+          </button>
+        </div>
+      </div>
+
+      <div class="cartoes">
+        <div class="cartao-kpi">
+          <div class="kpi-icone kpi-azul"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg></div>
+          <div><span class="kpi-rotulo">Produtos cadastrados</span><strong class="kpi-valor" id="kpiProdutos">0</strong></div>
+        </div>
+        <div class="cartao-kpi">
+          <div class="kpi-icone kpi-verde"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg></div>
+          <div><span class="kpi-rotulo">Entradas hoje</span><strong class="kpi-valor" id="kpiEntradas">0</strong></div>
+        </div>
+        <div class="cartao-kpi">
+          <div class="kpi-icone kpi-laranja"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 9l4 4 3-3 5 6"/></svg></div>
+          <div><span class="kpi-rotulo">Saídas hoje</span><strong class="kpi-valor" id="kpiSaidas">0</strong></div>
+        </div>
+        <div class="cartao-kpi">
+          <div class="kpi-icone kpi-vermelho"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg></div>
+          <div><span class="kpi-rotulo">Estoque baixo / zerado</span><strong class="kpi-valor" id="kpiBaixo">0</strong></div>
+        </div>
+        <div class="cartao-kpi">
+          <div class="kpi-icone kpi-marrom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M14.5 9a2.5 2.5 0 0 0-2.5-1.5c-1.4 0-2.5.8-2.5 2s1 1.6 2.5 2 2.5.8 2.5 2-1.1 2-2.5 2A2.5 2.5 0 0 1 9.5 15M12 6v1.5M12 16.5V18"/></svg></div>
+          <div><span class="kpi-rotulo">Valor em estoque</span><strong class="kpi-valor" id="kpiValor">R$ 0,00</strong></div>
+        </div>
+      </div>
+
+      <div class="grade-painel">
+        <div class="painel-bloco">
+          <div class="bloco-cabecalho">
+            <h2>⚠️ Alertas de estoque</h2>
+            <button class="link-botao" data-ir="produtos" data-filtro-status="alerta">Ver todos</button>
+          </div>
+          <div id="listaAlertas" class="lista-alertas"></div>
+        </div>
+
+        <div class="painel-bloco">
+          <div class="bloco-cabecalho">
+            <h2>Últimas movimentações</h2>
+            <button class="link-botao" data-ir="historico">Ver histórico</button>
+          </div>
+          <div id="listaUltimas" class="lista-ultimas"></div>
+        </div>
+
+        <div class="painel-bloco painel-largo">
+          <div class="bloco-cabecalho">
+            <h2>Produtos por categoria</h2>
+          </div>
+          <div id="graficoCategorias" class="grafico-categorias"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= PRODUTOS ================= -->
+    <section class="tela" id="tela-produtos">
+      <div class="tela-titulo">
+        <div>
+          <h1>Produtos e materiais</h1>
+          <p class="subtitulo">Linhas, agulhas, lixas, couro, solados e tudo o que a fábrica usa.</p>
+        </div>
+        <div class="grupo-botoes">
+          <button class="botao botao-secundario" id="exportarProdutosCsv">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            Exportar planilha
+          </button>
+          <button class="botao botao-secundario" onclick="window.print()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
+            Imprimir
+          </button>
+          <button class="botao botao-primario" data-acao="novo-produto">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+            Novo produto
+          </button>
+        </div>
+      </div>
+
+      <div class="barra-filtros">
+        <div class="campo-busca">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input type="search" id="buscaProduto" placeholder="Buscar por nome, código, local ou fornecedor...">
+        </div>
+        <select id="filtroCategoria"><option value="">Todas as categorias</option></select>
+        <select id="filtroStatus">
+          <option value="">Todos os status</option>
+          <option value="ok">Em estoque</option>
+          <option value="alerta">Baixo ou zerado</option>
+          <option value="baixo">Estoque baixo</option>
+          <option value="zerado">Zerado</option>
+        </select>
+      </div>
+
+      <div class="tabela-caixa">
+        <table class="tabela">
+          <thead>
+            <tr>
+              <th data-ordenar="codigo">Código</th>
+              <th data-ordenar="nome">Produto</th>
+              <th data-ordenar="categoria">Categoria</th>
+              <th data-ordenar="quantidade" class="num">Quantidade</th>
+              <th data-ordenar="minimo" class="num">Mínimo</th>
+              <th data-ordenar="local">Local</th>
+              <th>Status</th>
+              <th class="acoes-col">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaProdutos"></tbody>
+        </table>
+        <div class="vazio" id="produtosVazio" hidden>
+          <p>Nenhum produto encontrado.</p>
+          <button class="botao botao-primario" data-acao="novo-produto">Cadastrar produto</button>
+        </div>
+      </div>
+      <p class="rodape-tabela" id="resumoProdutos"></p>
+    </section>
+
+    <!-- ================= ENTRADA / SAÍDA ================= -->
+    <section class="tela" id="tela-movimentar">
+      <div class="tela-titulo">
+        <div>
+          <h1>Entrada e saída de material</h1>
+          <p class="subtitulo">Registre o que chegou do fornecedor e o que foi usado na produção.</p>
+        </div>
+      </div>
+
+      <div class="grade-movimentar">
+        <form class="painel-bloco formulario" id="formMovimento" autocomplete="off">
+          <div class="seletor-tipo">
+            <label class="tipo-opcao tipo-entrada">
+              <input type="radio" name="tipo" value="entrada" checked>
+              <span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7 7 7-7"/></svg>
+                Entrada
+              </span>
+            </label>
+            <label class="tipo-opcao tipo-saida">
+              <input type="radio" name="tipo" value="saida">
+              <span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7-7 7 7"/></svg>
+                Saída
+              </span>
+            </label>
+          </div>
+
+          <div class="campo">
+            <label for="movProduto">Produto *</label>
+            <select id="movProduto" required></select>
+          </div>
+
+          <div class="info-produto" id="infoProduto" hidden></div>
+
+          <div class="linha-campos">
+            <div class="campo">
+              <label for="movQuantidade">Quantidade *</label>
+              <input type="number" id="movQuantidade" min="0.01" step="any" required placeholder="0">
+            </div>
+            <div class="campo">
+              <label for="movData">Data *</label>
+              <input type="date" id="movData" required>
+            </div>
+          </div>
+
+          <div class="linha-campos">
+            <div class="campo">
+              <label for="movResponsavel">Responsável</label>
+              <input type="text" id="movResponsavel" placeholder="Quem registrou">
+            </div>
+            <div class="campo">
+              <label for="movDocumento" id="rotuloDocumento">Nota fiscal / Fornecedor</label>
+              <input type="text" id="movDocumento" placeholder="Ex.: NF 1234">
+            </div>
+          </div>
+
+          <div class="campo">
+            <label for="movObs">Observação</label>
+            <textarea id="movObs" rows="2" placeholder="Ex.: Lote de produção 15, setor de costura..."></textarea>
+          </div>
+
+          <button type="submit" class="botao botao-primario botao-grande" id="botaoRegistrar">Registrar entrada</button>
+        </form>
+
+        <div class="painel-bloco">
+          <div class="bloco-cabecalho">
+            <h2>Movimentações de hoje</h2>
+          </div>
+          <div id="listaHoje" class="lista-ultimas"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= HISTÓRICO ================= -->
+    <section class="tela" id="tela-historico">
+      <div class="tela-titulo">
+        <div>
+          <h1>Histórico de movimentações</h1>
+          <p class="subtitulo">Todas as entradas e saídas registradas.</p>
+        </div>
+        <div class="grupo-botoes">
+          <button class="botao botao-secundario" id="exportarHistoricoCsv">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            Exportar planilha
+          </button>
+          <button class="botao botao-secundario" onclick="window.print()">Imprimir</button>
+        </div>
+      </div>
+
+      <div class="barra-filtros">
+        <div class="campo-busca">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input type="search" id="buscaHistorico" placeholder="Buscar produto, responsável, observação...">
+        </div>
+        <select id="filtroTipo">
+          <option value="">Entradas e saídas</option>
+          <option value="entrada">Somente entradas</option>
+          <option value="saida">Somente saídas</option>
+        </select>
+        <label class="filtro-data">De <input type="date" id="filtroDe"></label>
+        <label class="filtro-data">Até <input type="date" id="filtroAte"></label>
+      </div>
+
+      <div class="resumo-historico" id="resumoHistorico"></div>
+
+      <div class="tabela-caixa">
+        <table class="tabela">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Tipo</th>
+              <th>Produto</th>
+              <th class="num">Quantidade</th>
+              <th class="num">Saldo após</th>
+              <th>Responsável</th>
+              <th>Documento / Obs.</th>
+              <th class="acoes-col">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaHistorico"></tbody>
+        </table>
+        <div class="vazio" id="historicoVazio" hidden><p>Nenhuma movimentação encontrada.</p></div>
+      </div>
+    </section>
+
+    <!-- ================= BACKUP E AJUSTES ================= -->
+    <section class="tela" id="tela-config">
+      <div class="tela-titulo">
+        <div>
+          <h1>Backup e ajustes</h1>
+          <p class="subtitulo">Os dados ficam salvos automaticamente neste navegador. Faça backup com frequência.</p>
+        </div>
+      </div>
+
+      <div class="grade-config">
+        <div class="painel-bloco">
+          <h2>💾 Cópia de segurança</h2>
+          <p class="texto-ajuda">Baixe um arquivo com todos os produtos e movimentações. Use-o para restaurar os dados ou levar para outro computador.</p>
+          <div class="grupo-botoes">
+            <button class="botao botao-primario" id="baixarBackup">Baixar backup</button>
+            <label class="botao botao-secundario">
+              Restaurar backup
+              <input type="file" id="restaurarBackup" accept=".json,application/json" hidden>
+            </label>
+          </div>
+          <p class="texto-ajuda" id="ultimoBackup"></p>
+        </div>
+
+        <div class="painel-bloco">
+          <h2>🏷️ Categorias</h2>
+          <p class="texto-ajuda">Crie categorias para organizar os materiais da fábrica.</p>
+          <form class="linha-adicionar" id="formCategoria">
+            <input type="text" id="novaCategoria" placeholder="Nova categoria (ex.: Fivelas)" required>
+            <button class="botao botao-primario" type="submit">Adicionar</button>
+          </form>
+          <div class="etiquetas" id="listaCategorias"></div>
+        </div>
+
+        <div class="painel-bloco">
+          <h2>📏 Unidades de medida</h2>
+          <p class="texto-ajuda">Unidades disponíveis no cadastro de produtos.</p>
+          <form class="linha-adicionar" id="formUnidade">
+            <input type="text" id="novaUnidade" placeholder="Nova unidade (ex.: carretel)" required>
+            <button class="botao botao-primario" type="submit">Adicionar</button>
+          </form>
+          <div class="etiquetas" id="listaUnidades"></div>
+        </div>
+
+        <div class="painel-bloco zona-perigo">
+          <h2>🗑️ Apagar dados</h2>
+          <p class="texto-ajuda">Remove todos os produtos e o histórico deste navegador. Faça um backup antes.</p>
+          <button class="botao botao-perigo" id="apagarTudo">Apagar todos os dados</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ================= RODAPÉ ================= -->
+  <footer class="rodape">
+
+    <!-- Faixa de contato -->
+    <div class="rodape-faixa">
+      <div class="container rodape-faixa-conteudo">
+        <div>
+          <h3>Precisa falar com a fábrica?</h3>
+          <p>Atendimento de segunda a sexta-feira, em horário comercial.</p>
+        </div>
+        <div class="rodape-faixa-botoes">
+          <a class="botao-whats" href="https://wa.me/553433150163?text=Ol%C3%A1!%20Gostaria%20de%20mais%20informa%C3%A7%C3%B5es." target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.7-.8-2-.9-.3-.1-.5-.1-.7.1-.2.3-.8.9-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6l.4-.5c.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5l-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.1 4.9 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.6-.1 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3zM12 21.8c-1.8 0-3.5-.5-5-1.4l-.4-.2-3.7 1 1-3.6-.2-.4A9.8 9.8 0 1 1 12 21.8zm0-21.6A11.8 11.8 0 0 0 1.8 17.9L.2 23.8l6-1.6A11.8 11.8 0 1 0 12 .2z"/></svg>
+            WhatsApp
+          </a>
+          <a class="botao-ligar" href="tel:+553433150163">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>
+            (34) 3315-0163
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Colunas -->
+    <div class="container rodape-grade">
+
+      <div class="rodape-coluna">
+        <div class="rodape-marca">
+          <img class="marca-logo" src="/IMAGE/LOGO COURO FORTE.jpg" alt="Logo Botinas Couro Forte">
+          <div>
+            <strong>Botinas Couro Forte</strong>
+            <small>Uberaba – MG</small>
+          </div>
+        </div>
+        <p class="rodape-sobre">Qualidade e resistência em botinas de couro, com fabricação própria em Uberaba – MG.</p>
+
+        <h4>Acesso rápido</h4>
+        <ul class="rodape-links">
+          <li><a href="#" data-ir="painel">Painel geral</a></li>
+          <li><a href="#" data-ir="produtos">Produtos</a></li>
+          <li><a href="#" data-ir="movimentar">Entrada / Saída</a></li>
+          <li><a href="#" data-ir="historico">Histórico</a></li>
+          <li><a href="#" data-ir="config">Backup e Ajustes</a></li>
+        </ul>
+      </div>
+
+      <div class="rodape-coluna">
+        <h4>Contato</h4>
+        <ul class="rodape-contatos">
+          <li>
+            <span class="contato-icone icone-whats"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.7-.8-2-.9-.3-.1-.5-.1-.7.1-.2.3-.8.9-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6l.4-.5c.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5l-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.1 4.9 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.6-.1 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3zM12 21.8c-1.8 0-3.5-.5-5-1.4l-.4-.2-3.7 1 1-3.6-.2-.4A9.8 9.8 0 1 1 12 21.8zm0-21.6A11.8 11.8 0 0 0 1.8 17.9L.2 23.8l6-1.6A11.8 11.8 0 1 0 12 .2z"/></svg></span>
+            <div><small>WhatsApp</small><a href="https://wa.me/553433150163" target="_blank" rel="noopener">(34) 3315-0163</a></div>
+          </li>
+          <li>
+            <span class="contato-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/></svg></span>
+            <div><small>Celular</small><a href="tel:+553433150163">(34) 3315-0163</a></div>
+          </li>
+          <li>
+            <span class="contato-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg></span>
+            <div><small>Telefone fixo</small><a href="tel:+553433150163">(34) 3315-0163</a></div>
+          </li>
+          <li>
+            <span class="contato-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></span>
+            <div><small>Endereço</small><span>Rua Nair Borges Bento, 304<br>Manoel Mendes · Uberaba – MG<br>CEP 38082-167</span></div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="rodape-coluna">
+        <div class="rodape-titulo-linha">
+          <h4>Horário de funcionamento</h4>
+          <span class="status-aberto" id="statusAberto">—</span>
+        </div>
+        <ul class="rodape-horario" id="listaHorario">
+          <li data-dia="1"><span>Segunda-feira</span><span>07:30 – 10:30 <i>·</i> 12:30 – 17:30</span></li>
+          <li data-dia="2"><span>Terça-feira</span><span>07:30 – 10:30 <i>·</i> 12:30 – 17:30</span></li>
+          <li data-dia="3"><span>Quarta-feira</span><span>07:30 – 10:30 <i>·</i> 12:30 – 17:30</span></li>
+          <li data-dia="4"><span>Quinta-feira</span><span>07:30 – 10:30 <i>·</i> 12:30 – 17:30</span></li>
+          <li data-dia="5"><span>Sexta-feira</span><span>07:30 – 10:30 <i>·</i> 12:30 – 17:30</span></li>
+          <li data-dia="6" class="dia-fechado"><span>Sábado</span><span>Fechado</span></li>
+          <li data-dia="0" class="dia-fechado"><span>Domingo</span><span>Fechado</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Mapa -->
+    <div class="container rodape-mapa-area">
+      <div class="mapa">
+        <iframe
+          title="Mapa da fábrica"
+          src="https://www.google.com/maps?q=Rua+Nair+Borges+Bento,+304,+Manoel+Mendes,+Uberaba+-+MG,+38082-167&output=embed"
+          loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+        <div class="mapa-cartao">
+          <span class="contato-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></span>
+          <div>
+            <strong>Nossa localização</strong>
+            <span>Rua Nair Borges Bento, 304<br>Manoel Mendes · Uberaba – MG<br>CEP 38082-167</span>
+            <a href="https://www.google.com/maps/search/?api=1&query=Rua+Nair+Borges+Bento,+304,+Manoel+Mendes,+Uberaba+-+MG,+38082-167" target="_blank" rel="noopener">Como chegar →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Base -->
+    <div class="rodape-base">
+      <div class="container rodape-base-conteudo">
+        <span>© <span id="anoAtual"></span> Botinas Couro Forte. Todos os direitos reservados.</span>
+        <span>Sistema de Controle de Estoque</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Botão voltar ao topo -->
+  <button class="botao-topo" id="botaoTopo" title="Voltar ao topo" aria-label="Voltar ao topo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>
+  </button>
+
+  <!-- ================= MODAL PRODUTO ================= -->
+  <div class="modal-fundo" id="modalProduto" hidden>
+    <form class="modal" id="formProduto" autocomplete="off">
+      <div class="modal-cabecalho">
+        <h2 id="tituloModalProduto">Novo produto</h2>
+        <button type="button" class="modal-fechar" data-fechar aria-label="Fechar">×</button>
+      </div>
+      <div class="modal-corpo">
+        <input type="hidden" id="prodId">
+        <div class="linha-campos">
+          <div class="campo campo-curto">
+            <label for="prodCodigo">Código</label>
+            <input type="text" id="prodCodigo" placeholder="Automático">
+          </div>
+          <div class="campo">
+            <label for="prodNome">Nome do produto *</label>
+            <input type="text" id="prodNome" required placeholder="Ex.: Linha de nylon 40 preta">
+          </div>
+        </div>
+        <div class="linha-campos">
+          <div class="campo">
+            <label for="prodCategoria">Categoria *</label>
+            <select id="prodCategoria" required></select>
+          </div>
+          <div class="campo">
+            <label for="prodUnidade">Unidade *</label>
+            <select id="prodUnidade" required></select>
+          </div>
+        </div>
+        <div class="linha-campos">
+          <div class="campo" id="campoQtdInicial">
+            <label for="prodQuantidade">Quantidade inicial</label>
+            <input type="number" id="prodQuantidade" min="0" step="any" value="0">
+          </div>
+          <div class="campo">
+            <label for="prodMinimo">Estoque mínimo</label>
+            <input type="number" id="prodMinimo" min="0" step="any" value="0">
+          </div>
+          <div class="campo">
+            <label for="prodPreco">Custo unitário (R$)</label>
+            <input type="number" id="prodPreco" min="0" step="0.01" placeholder="0,00">
+          </div>
+        </div>
+        <div class="linha-campos">
+          <div class="campo">
+            <label for="prodLocal">Local / Prateleira</label>
+            <input type="text" id="prodLocal" placeholder="Ex.: Almoxarifado A-2">
+          </div>
+          <div class="campo">
+            <label for="prodFornecedor">Fornecedor</label>
+            <input type="text" id="prodFornecedor" placeholder="Nome do fornecedor">
+          </div>
+        </div>
+        <div class="campo">
+          <label for="prodDescricao">Descrição / Observações</label>
+          <textarea id="prodDescricao" rows="2" placeholder="Cor, medida, especificação..."></textarea>
+        </div>
+      </div>
+      <div class="modal-rodape">
+        <button type="button" class="botao botao-secundario" data-fechar>Cancelar</button>
+        <button type="submit" class="botao botao-primario">Salvar produto</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ================= MODAL MOVIMENTO RÁPIDO ================= -->
+  <div class="modal-fundo" id="modalMovRapido" hidden>
+    <form class="modal modal-pequeno" id="formMovRapido" autocomplete="off">
+      <div class="modal-cabecalho">
+        <h2 id="tituloMovRapido">Entrada</h2>
+        <button type="button" class="modal-fechar" data-fechar aria-label="Fechar">×</button>
+      </div>
+      <div class="modal-corpo">
+        <input type="hidden" id="rapidoProdutoId">
+        <input type="hidden" id="rapidoTipo">
+        <div class="info-produto" id="rapidoInfo"></div>
+        <div class="linha-campos">
+          <div class="campo">
+            <label for="rapidoQuantidade">Quantidade *</label>
+            <input type="number" id="rapidoQuantidade" min="0.01" step="any" required>
+          </div>
+          <div class="campo">
+            <label for="rapidoData">Data *</label>
+            <input type="date" id="rapidoData" required>
+          </div>
+        </div>
+        <div class="campo">
+          <label for="rapidoResponsavel">Responsável</label>
+          <input type="text" id="rapidoResponsavel" placeholder="Quem registrou">
+        </div>
+        <div class="campo">
+          <label for="rapidoObs">Observação</label>
+          <input type="text" id="rapidoObs" placeholder="Opcional">
+        </div>
+      </div>
+      <div class="modal-rodape">
+        <button type="button" class="botao botao-secundario" data-fechar>Cancelar</button>
+        <button type="submit" class="botao botao-primario" id="botaoRapido">Registrar</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ================= MODAL CONFIRMAÇÃO ================= -->
+  <div class="modal-fundo" id="modalConfirmar" hidden>
+    <div class="modal modal-pequeno">
+      <div class="modal-cabecalho">
+        <h2 id="confirmarTitulo">Confirmar</h2>
+      </div>
+      <div class="modal-corpo"><p id="confirmarTexto"></p></div>
+      <div class="modal-rodape">
+        <button type="button" class="botao botao-secundario" id="confirmarNao">Cancelar</button>
+        <button type="button" class="botao botao-perigo" id="confirmarSim">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="avisos" id="avisos"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
